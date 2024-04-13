@@ -1,0 +1,13 @@
+CFLAGS=-Wall -Werror -O3 -fopenmp -DUSE_LESS_MEMORY
+LDFLAGS=-O3 -fopenmp
+
+all: meshed.exe
+
+clean:
+	$(RM) *.o
+
+meshed.exe: main.o timeval_diff.o raster.o outlet_list.o outlets.o delineate.o hierarchy.o
+	$(CC) $(LDFLAGS) -o $@ $^ /c/OSGeo4W/lib/gdal_i.lib
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -I/c/OSGeo4W/include
