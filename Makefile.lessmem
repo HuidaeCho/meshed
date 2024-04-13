@@ -1,12 +1,12 @@
 CFLAGS=-Wall -Werror -O3 -fopenmp -DUSE_LESS_MEMORY
 LDFLAGS=-O3 -fopenmp
 
-all: meshed
+all: meshed-lessmem
 
 clean:
 	$(RM) *.o
 
-meshed: main.o timeval_diff.o raster.o outlet_list.o outlets.o delineate.o hierarchy.o
+meshed-lessmem: main.o timeval_diff.o raster.o outlet_list.o outlets.o delineate.o hierarchy.o
 	$(CC) $(LDFLAGS) -o $@ $^ `gdal-config --libs`
 
 %.o: %.c
