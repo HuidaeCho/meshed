@@ -97,7 +97,13 @@ struct outlet_list *read_outlets(char *, char *, struct raster_map *);
 int write_outlets(const char *, struct outlet_list *);
 
 /* delineate.c */
-void delineate(struct raster_map *, struct outlet_list *);
+void delineate(struct raster_map *, struct outlet_list *, int);
+
+/* delineate_lessmem.c */
+void delineate_lessmem(struct raster_map *, struct outlet_list *);
+
+/* delineate_moremem.c */
+void delineate_moremem(struct raster_map *, struct outlet_list *);
 
 /* hierarchy.c */
 struct hierarchy *analyze_hierarchy(struct raster_map *,

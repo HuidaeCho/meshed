@@ -14,7 +14,7 @@
 int main(int argc, char *argv[])
 {
     int i;
-    char print_usage = 1, flag_compress = 0, flag_outlets = 0;
+    int print_usage = 1, use_lessmem = 0, compress = 0, save_outlets = 0;
     char *dir_path = NULL, *outlets_path = NULL, *id_col =
         NULL, *output_path = NULL, *hier_path = NULL;
     struct raster_map *dir_map;
@@ -28,11 +28,14 @@ int main(int argc, char *argv[])
 
             for (j = 1; j < n && !unknown; j++) {
                 switch (argv[i][j]) {
+                case 'l':
+                    use_lessmem = 1;
+                    break;
                 case 'c':
-                    flag_compress = 1;
+                    compress = 1;
                     break;
                 case 'o':
-                    flag_outlets = 1;
+                    save_outlets = 1;
                     break;
                 default:
                     unknown = 1;
@@ -65,11 +68,11 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (flag_outlets && (flag_compress || hier_path)) {
-        if (flag_compress && hier_path)
+    if (save_outlets && (compress || hier_path)) {
+        if (compress && hier_path)
             fprintf(stderr,
                     "Unable to process -o, -c, and hierarchy.txt at once\n");
-        else if (flag_compress)
+        else if (compress)
             fprintf(stderr, "Unable to process both -o and -c\n");
         else
             fprintf(stderr, "Unable to process both -o and hierarchy.txt\n");
@@ -80,10 +83,11 @@ int main(int argc, char *argv[])
         if (print_usage == 2)
             printf("\n");
         printf
-            ("Usage: meshed [-o] [-c] fdr.tif outlets.shp id_col output.ext [hierarchy.txt]\n");
+            ("Usage: meshed [-lco] fdr.tif outlets.shp id_col output.ext [hierarchy.txt]\n");
         printf("\n");
-        printf("  -o\t\tWrite outlet rows and columns, and exit\n");
+        printf("  -l\t\tUse less memory\n");
         printf("  -c\t\tCompress output GeoTIFF file\n");
+        printf("  -o\t\tWrite outlet rows and columns, and exit\n");
         printf("  fdr.tif\tInput GeoTIFF file of flow direction raster\n");
         printf("  outlets.shp\tInput Shapefile of outlets\n");
         printf("  id_col\tID column\n");
@@ -119,7 +123,7 @@ int main(int argc, char *argv[])
     printf("Input time for outlets: %lld microsec\n",
            timeval_diff(NULL, &end_time, &start_time));
 
-    if (flag_outlets) {
+    if (save_outlets) {
         printf("Writing outlets...\n");
         gettimeofday(&start_time, NULL);
         if (write_outlets(output_path, outlet_l) > 0) {
@@ -136,13 +140,13 @@ int main(int argc, char *argv[])
     else {
         printf("Delineating subwatersheds...\n");
         gettimeofday(&start_time, NULL);
-        delineate(dir_map, outlet_l);
+        delineate(dir_map, outlet_l, use_lessmem);
         gettimeofday(&end_time, NULL);
         printf
             ("Computation time for subwatershed delineation: %lld microsec\n",
              timeval_diff(NULL, &end_time, &start_time));
 
-        dir_map->compress = flag_compress;
+        dir_map->compress = compress;
         printf("Writing subwatersheds raster <%s>...\n", output_path);
         gettimeofday(&start_time, NULL);
         if (write_raster(output_path, dir_map) > 0) {
