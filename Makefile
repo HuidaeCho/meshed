@@ -26,5 +26,5 @@ meshed$(EXT): \
 	hierarchy.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(GDALLIBS)
 
-*.o: global.h
+*.o: global.h raster.h
 delineate_*.o: delineate_funcs.h

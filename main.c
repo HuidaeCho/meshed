@@ -14,7 +14,8 @@
 int main(int argc, char *argv[])
 {
     int i;
-    int print_usage = 1, use_lessmem = 0, compress = 0, save_outlets = 0;
+    int print_usage = 1, use_lessmem = 0, compress_output = 0, save_outlets =
+        0;
     char *dir_path = NULL, *outlets_path = NULL, *id_col =
         NULL, *output_path = NULL, *hier_path = NULL;
     struct raster_map *dir_map;
@@ -32,7 +33,7 @@ int main(int argc, char *argv[])
                     use_lessmem = 1;
                     break;
                 case 'c':
-                    compress = 1;
+                    compress_output = 1;
                     break;
                 case 'o':
                     save_outlets = 1;
@@ -68,11 +69,11 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (save_outlets && (compress || hier_path)) {
-        if (compress && hier_path)
+    if (save_outlets && (compress_output || hier_path)) {
+        if (compress_output && hier_path)
             fprintf(stderr,
                     "Unable to process -o, -c, and hierarchy.txt at once\n");
-        else if (compress)
+        else if (compress_output)
             fprintf(stderr, "Unable to process both -o and -c\n");
         else
             fprintf(stderr, "Unable to process both -o and hierarchy.txt\n");
@@ -146,10 +147,10 @@ int main(int argc, char *argv[])
             ("Computation time for subwatershed delineation: %lld microsec\n",
              timeval_diff(NULL, &end_time, &start_time));
 
-        dir_map->compress = compress;
+        dir_map->compress = compress_output;
         printf("Writing subwatersheds raster <%s>...\n", output_path);
         gettimeofday(&start_time, NULL);
-        if (write_raster(output_path, dir_map) > 0) {
+        if (write_raster(output_path, dir_map, RASTER_MAP_TYPE_AUTO) > 0) {
             fprintf(stderr, "%s: Failed to write subwatersheds raster\n",
                     output_path);
             free_raster(dir_map);
