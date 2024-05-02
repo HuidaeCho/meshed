@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
     printf("Reading flow direction raster <%s>...\n", dir_path);
     gettimeofday(&start_time, NULL);
-    if (!(dir_map = read_raster(dir_path, RASTER_MAP_TYPE_INT32))) {
+    if (!(dir_map = read_raster(dir_path, RASTER_MAP_TYPE_INT32, 0))) {
         fprintf(stderr, "%s: Failed to read flow direction raster\n",
                 dir_path);
         exit(EXIT_FAILURE);
