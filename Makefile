@@ -1,13 +1,12 @@
 ifeq ($(OS),Windows_NT)
-	CFLAGS=-Wall -Werror -O3 -fopenmp -I/c/OSGeo4W/include
-	GDALLIBS=/c/OSGeo4W/lib/gdal_i.lib
+	GDAL_CFLAGS=-I/c/OSGeo4W/include
+	GDAL_LIBS=/c/OSGeo4W/lib/gdal_i.lib
 	EXT=.exe
 else
-	CFLAGS=-Wall -Werror -O3 -fopenmp
-	GDALLIBS=`gdal-config --libs`
-	EXT=
+	GDAL_LIBS=`gdal-config --libs`
 endif
-LDFLAGS=-O3 -fopenmp -lm
+CFLAGS=-Wall -Werror -O3 -fopenmp $(GDAL_CFLAGS)
+LDFLAGS=-O3 -fopenmp -lm $(GDAL_LIBS)
 
 all: meshed$(EXT)
 
@@ -24,7 +23,7 @@ meshed$(EXT): \
 	delineate_lessmem.o \
 	delineate_moremem.o \
 	hierarchy.o
-	$(CC) $(LDFLAGS) -o $@ $^ $(GDALLIBS)
+	$(CC) $(LDFLAGS) -o $@ $^
 
 *.o: global.h raster.h
 delineate_*.o: delineate_funcs.h
