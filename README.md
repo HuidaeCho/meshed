@@ -1,6 +1,6 @@
 # Memory-Efficient Watershed Delineation (MESHED)
 
-Part of Memory-Efficient Improved DEM Analysis System (MEIDAS)
+Part of Memory-efficient Input Drainage paths Analysis System (MIDAS)
 
 ```bash
 # build meshed
