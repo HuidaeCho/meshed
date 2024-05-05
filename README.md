@@ -15,7 +15,7 @@ for i in \
   outlets1000.shp \
   outlets1000.shx \
   ; do
-  curl https://data.isnew.info/meidas/$i -o inputs/$i
+  curl https://data.isnew.info/meshed/$i -o inputs/$i
 done
 
 # run the more-memory version
