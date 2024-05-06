@@ -4,7 +4,7 @@ Part of Memory-efficient Input Drainage paths Analysis System (MIDAS)
 
 ## Testing on Windows
 
-```dos
+```cmd
 cd test
 pretest_TX.bat
 test_TX.bat
