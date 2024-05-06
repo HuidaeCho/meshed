@@ -2,6 +2,19 @@
 
 Part of Memory-efficient Input Drainage paths Analysis System (MIDAS)
 
+## Requirements
+
+* C compiler with [OpenMP](https://www.openmp.org/) support
+* [GDAL](https://gdal.org/)
+
+For Windows, use [MSYS2](https://www.msys2.org/) and [OSGeo4W](https://trac.osgeo.org/osgeo4w/) to install [GCC](https://gcc.gnu.org/) and [GDAL](https://gdal.org/), respectively.
+
+## How to compile MESHED on Linux
+
+```bash
+make
+```
+
 ## Test data
 
 Test data is available at https://data.isnew.info/meshed.html.
