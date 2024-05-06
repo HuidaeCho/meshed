@@ -1,7 +1,10 @@
 @echo off
+setlocal EnableDelayedExpansion
 set PATH=..\windows;..\windows\lib;%PATH%
 set PROJ_LIB=..\windows\lib
 
-
-meshed inputs_TX\fdr.tif inputs_TX\outlets1000.shp cat outputs_TX\wsheds1000.tif
-meshed -l inputs_TX\fdr.tif inputs_TX\outlets1000.shp cat outputs_TX\wsheds1000-lessmem.tif
+for %%o in (inputs_TX\outlets*.shp) do (
+	set o=%%~no
+	set w=!o:outlets=wsheds!
+	meshed -c inputs_TX\fdr.tif %%o cat outputs_TX\!w!.tif
+)
