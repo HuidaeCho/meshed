@@ -9,7 +9,7 @@ Part of Memory-efficient Input Drainage paths Analysis System (MIDAS)
 
 For Windows, use [MSYS2](https://www.msys2.org/) and [OSGeo4W](https://trac.osgeo.org/osgeo4w/) to install [GCC](https://gcc.gnu.org/) and [GDAL](https://gdal.org/), respectively.
 
-## How to compile MESHED on Linux
+## How to compile MESHED
 
 ```bash
 make
