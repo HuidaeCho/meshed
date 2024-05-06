@@ -2,6 +2,10 @@
 
 Part of Memory-efficient Input Drainage paths Analysis System (MIDAS)
 
+## Test data
+
+Test data is available at https://data.isnew.info/meshed.html.
+
 ## Testing on Windows
 
 ```cmd
