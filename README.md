@@ -1,6 +1,6 @@
 # Memory-Efficient Watershed Delineation (MESHED)
 
-Part of the Memory-Efficient I/O-Improved DEM Analysis System (MIDAS)
+Part of the Memory-Efficient I/O-Improved Drainage Analysis System (MIDAS)
 
 ## Requirements
 
