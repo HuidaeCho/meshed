@@ -2,6 +2,9 @@
 
 Part of the [Memory-Efficient I/O-Improved Drainage Analysis System (MIDAS)](https://github.com/HuidaeCho/midas)
 
+Flow direction encoding in GeoTIFF:<br>
+![image](https://github.com/HuidaeCho/mefa/assets/7456117/6268b904-24a4-482e-8f6d-9ec9c4edf143)
+
 ## Requirements
 
 * C compiler with [OpenMP](https://www.openmp.org/) support
