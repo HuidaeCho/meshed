@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include "global.h"
 
-#define DIR(row, col) dir_map->cells.int32[(size_t)(row) * ncols + (col)]
+#define INDEX(row, col) ((size_t)(row) * ncols + (col))
+#define DIR(row, col) dir_map->cells.int32[INDEX(row, col)]
 #define SHED(row, col) DIR(row, col)
 
 #ifdef USE_LESS_MEMORY
@@ -14,7 +15,7 @@
 #else
 #define DELINEATE delineate_moremem
 #define GET_DIR(row, col) DIR(row, col)
-#define DONE(row, col) done[(size_t)(row) * ncols + (col)]
+#define DONE(row, col) done[INDEX(row, col)]
 #define SET_DONE(row, col) do { DONE(row, col) = 1; } while(0)
 #define IS_NOTDONE(row, col) !DONE(row, col)
 #define IS_DONE(row, col) DONE(row, col)
