@@ -334,8 +334,6 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
     GDALDatasetH dataset;
     GDALRasterBandH band;
     GDALDataType data_type, gdt_type;
-    size_t row_size;
-    int row;
 
     if (!driver)
         return 1;
@@ -346,8 +344,6 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
 
     if (rast_map->compress)
         options = CSLSetNameValue(options, "COMPRESS", "ZSTD");
-
-    row_size = rast_map->ncols;
 
     /* actual data size */
     switch (rast_map->type) {
@@ -367,7 +363,6 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
         data_type = GDT_Byte;
         break;
     }
-    row_size *= GDALGetDataTypeSizeBytes(data_type);
 
     /* requested data type */
     gdt_type = data_type;
@@ -402,13 +397,13 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
     band = GDALGetRasterBand(dataset, 1);
     GDALSetRasterNoDataValue(band, rast_map->null_value);
 
-    for (row = 0; row < rast_map->nrows; row++) {
-        if (GDALRasterIO
-            (band, GF_Write, 0, row, rast_map->ncols, 1,
-             (char *)rast_map->cells.v + row * row_size, rast_map->ncols,
-             1, data_type, 0, 0) != CE_None)
-            return 4;
-    }
+    const int ret = GDALRasterIO(
+        band, GF_Write, 0, 0, rast_map->ncols, rast_map->nrows,
+        (char *)rast_map->cells.v, rast_map->ncols,
+        rast_map->nrows, data_type, 0, 0);
+
+    if (ret != CE_None)
+        return 4;
 
     GDALClose(dataset);
 
