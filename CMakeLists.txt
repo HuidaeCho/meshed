@@ -48,6 +48,7 @@ add_executable(meshed.exe
 
 target_link_libraries(meshed.exe PRIVATE GDAL::GDAL OpenMP::OpenMP_C m)
 target_compile_options(meshed.exe PRIVATE ${WARNING_FLAGS})
+set_property(TARGET meshed.exe PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   target_compile_options(meshed.exe PRIVATE -foptimize-sibling-calls)
 endif()

@@ -345,7 +345,7 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
         return 2;
 
     if (rast_map->compress)
-        options = CSLSetNameValue(options, "COMPRESS", "LZW");
+        options = CSLSetNameValue(options, "COMPRESS", "ZSTD");
 
     row_size = rast_map->ncols;
 
