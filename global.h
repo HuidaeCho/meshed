@@ -83,4 +83,10 @@ struct hierarchy *analyze_hierarchy(struct raster_map *,
                                     struct outlet_list *);
 int write_hierarchy(const char *, struct hierarchy *);
 
+#if defined(__clang_major__) && __clang_major__ >= 13
+#define MUST_TAIL __attribute__((musttail))
+#else
+#define MUST_TAIL
+#endif
+
 #endif

@@ -163,7 +163,7 @@ static void trace_up(struct raster_map *dir_map, int row, int col, int id,
 
     /* use gcc -O2 or -O3 flags for tail-call optimization
      * (-foptimize-sibling-calls) */
-    trace_up(dir_map, row_next, col_next, id, up_stack);
+    MUST_TAIL return trace_up(dir_map, row_next, col_next, id, up_stack);
 }
 
 static void init_up_stack(struct cell_stack *up_stack)
