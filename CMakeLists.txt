@@ -1,11 +1,13 @@
 cmake_minimum_required (VERSION 3.9)
+cmake_policy(SET CMP0077 NEW)
 
 project(meshed
   VERSION 1.0.0
   LANGUAGES C
 )
 
-cmake_policy(SET CMP0077 NEW)
+option(USE_ASAN "Enable or disable address sanitizer" OFF)
+option(USE_USAN "Enable or disable undefined sanitizer" OFF)
 
 find_package(GDAL REQUIRED)
 find_package(OpenMP REQUIRED)
@@ -48,4 +50,13 @@ target_link_libraries(meshed.exe PRIVATE GDAL::GDAL OpenMP::OpenMP_C m)
 target_compile_options(meshed.exe PRIVATE ${WARNING_FLAGS})
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   target_compile_options(meshed.exe PRIVATE -foptimize-sibling-calls)
+endif()
+if(USE_ASAN)
+  target_compile_options(meshed.exe PRIVATE -fsanitize=address)
+  target_link_options(meshed.exe PRIVATE -fsanitize=address)
+endif()
+
+if(USE_USAN)
+  target_compile_options(meshed.exe PRIVATE -fsanitize=undefined)
+  target_link_options(meshed.exe PRIVATE -fsanitize=undefined)
 endif()

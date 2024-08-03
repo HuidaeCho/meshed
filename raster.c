@@ -228,7 +228,7 @@ struct raster_map *read_raster(const char *path, int type, int get_stats)
 #pragma omp parallel
     {
 #pragma omp single
-        datasets = malloc(sizeof *datasets * omp_get_num_threads());
+        datasets = malloc(sizeof(GDALDatasetH*) * omp_get_num_threads());
         datasets[omp_get_thread_num()] = GDALOpen(path, GA_ReadOnly);
     }
 
@@ -246,7 +246,7 @@ struct raster_map *read_raster(const char *path, int type, int get_stats)
 #pragma omp parallel
     {
 #pragma omp single
-        bands = malloc(sizeof *bands * omp_get_num_threads());
+        bands = malloc(sizeof(GDALRasterBandH*) * omp_get_num_threads());
         bands[omp_get_thread_num()] =
             GDALGetRasterBand(datasets[omp_get_thread_num()], 1);
     }
@@ -320,6 +320,9 @@ struct raster_map *read_raster(const char *path, int type, int get_stats)
 
     if (error)
         return NULL;
+
+    free(bands);
+    free(datasets);
 
     return rast_map;
 }
