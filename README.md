@@ -2,7 +2,10 @@
 
 Part of the [Memory-Efficient I/O-Improved Drainage Analysis System (MIDAS)](https://github.com/HuidaeCho/midas)
 
-A journal manuscript "*A memory-efficient watershed delineation OpenMP algorithm using a node-skipping depth-first search on a self-destructive flow direction matrix for CONUS-scale hydrologic modeling*" is under review for publication in [Environmental Modelling & Software](https://www.sciencedirect.com/journal/environmental-modelling-and-software).
+A journal manuscript "*Avoid backtracking and burn your inputs: CONUS-scale watershed delineation using OpenMP*" is accepted for publication in [Environmental Modelling & Software](https://www.sciencedirect.com/journal/environmental-modelling-and-software) in October 2024.
+Find [the author's version](https://idea.isnew.info/publications/Avoid%20backtracking%20and%20burn%20your%20inputs:%20CONUS-scale%20watershed%20delineation%20using%20OpenMP.pdf).
+
+Citation: Cho, H., Accepted for Publication in 2024. Avoid backtracking and burn your inputs: CONUS-scale watershed delineation using OpenMP. Environmental Modelling & Software.
 
 ![image](https://clawrim.isnew.info/wp-content/uploads/2024/07/meshed-flyer.png)
 
