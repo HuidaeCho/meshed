@@ -2,10 +2,10 @@
 
 Part of the [Memory-Efficient I/O-Improved Drainage Analysis System (MIDAS)](https://github.com/HuidaeCho/midas)
 
-A journal manuscript "*Avoid backtracking and burn your inputs: CONUS-scale watershed delineation using OpenMP*" is accepted for publication in [Environmental Modelling & Software](https://www.sciencedirect.com/journal/environmental-modelling-and-software) in October 2024.
+A journal manuscript "*Avoid backtracking and burn your inputs: CONUS-scale watershed delineation using OpenMP*" is published in [Environmental Modelling & Software](https://doi.org/10.1016/j.envsoft.2024.106244) in January 2025.
 Find [the author's version](https://idea.isnew.info/publications/Avoid%20backtracking%20and%20burn%20your%20inputs:%20CONUS-scale%20watershed%20delineation%20using%20OpenMP.pdf).
 
-Citation: Cho, H., Accepted for Publication in 2024. Avoid backtracking and burn your inputs: CONUS-scale watershed delineation using OpenMP. Environmental Modelling & Software.
+Citation: Cho, H., January 2025. Avoid Backtracking and Burn Your Inputs: CONUS-Scale Watershed Delineation Using OpenMP. Environmental Modelling & Software 183, 106244. [doi:10.1016/j.envsoft.2024.106244](https://doi.org/10.1016/j.envsoft.2024.106244).
 
 ![image](https://clawrim.isnew.info/wp-content/uploads/2024/07/meshed-flyer.png)
 
