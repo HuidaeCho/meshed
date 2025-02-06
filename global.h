@@ -73,6 +73,7 @@ int write_outlets(const char *, struct outlet_list *);
 void delineate(struct raster_map *, struct outlet_list *, int);
 
 /* delineate_lessmem.c */
+int convert_encoding(struct raster_map *, int *);
 void delineate_lessmem(struct raster_map *, struct outlet_list *);
 
 /* delineate_moremem.c */
