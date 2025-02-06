@@ -3,7 +3,7 @@
 #include "global.h"
 
 #define INDEX(row, col) ((size_t)(row) * ncols + (col))
-#define DIR_NULL (int)dir_map->null_value
+#define DIR_NULL dir_map->null_value
 #define DIR(row, col) dir_map->cells.int32[INDEX(row, col)]
 #define SHED(row, col) DIR(row, col)
 
