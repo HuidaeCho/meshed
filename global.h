@@ -59,6 +59,10 @@ GLOBAL int dir_checks[3][3]
 /* timeval_diff.c */
 long long timeval_diff(struct timeval *, struct timeval *, struct timeval *);
 
+/* recode.c */
+double recode_encoding(double, void *);
+double recode_degree(double, void *);
+
 /* outlet_list.c */
 void init_outlet_list(struct outlet_list *);
 void reset_outlet_list(struct outlet_list *);
