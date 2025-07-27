@@ -87,6 +87,6 @@ void delineate_moremem(struct raster_map *, struct outlet_list *);
 /* hierarchy.c */
 struct hierarchy *analyze_hierarchy(struct raster_map *,
                                     struct outlet_list *);
-int write_hierarchy(const char *, struct hierarchy *);
+int write_hierarchy(const char *, struct hierarchy *, const char *);
 
 #endif

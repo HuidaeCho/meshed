@@ -200,8 +200,7 @@ int main(int argc, char *argv[])
             ("  -O opts\tComma-separated list of GDAL options for outlets\n");
         printf
             ("  -o layer\tLayer name of input outlets vector, if necessary (e.g., gpkg)\n");
-        printf
-            ("  -h hier.txt\tOutput text file for subwatershed hierarchy\n");
+        printf("  -h hier.csv\tOutput subwatershed hierarchy CSV file\n");
         printf("  -t threads\tNumber of threads (default OMP_NUM_THREADS)\n");
         exit(print_usage == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
     }
@@ -304,7 +303,7 @@ int main(int argc, char *argv[])
                 ("Analysis time for subwatershed hierarchy: %lld microsec\n",
                  timeval_diff(NULL, &end_time, &start_time));
 
-            if (write_hierarchy(hier_path, hier) > 0) {
+            if (write_hierarchy(hier_path, hier, id_col) > 0) {
                 fprintf(stderr,
                         "%s: Failed to write subwatershed hierarchy file\n",
                         hier_path);

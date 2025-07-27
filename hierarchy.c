@@ -73,7 +73,8 @@ struct hierarchy *analyze_hierarchy(struct raster_map *shed_map,
     return hier;
 }
 
-int write_hierarchy(const char *hier_path, struct hierarchy *hier)
+int write_hierarchy(const char *hier_path, struct hierarchy *hier,
+                    const char *id_col)
 {
     FILE *fp;
     int i;
@@ -81,8 +82,10 @@ int write_hierarchy(const char *hier_path, struct hierarchy *hier)
     if (!(fp = fopen(hier_path, "w")))
         return 1;
 
+    fprintf(fp, "%s,%s_up,%s_down\n", id_col, id_col, id_col);
+
     for (i = 0; i < hier->n; i++)
-        fprintf(fp, "%d %d %d\n", hier->self[i], hier->up[i], hier->down[i]);
+        fprintf(fp, "%d,%d,%d\n", hier->self[i], hier->up[i], hier->down[i]);
 
     fclose(fp);
 
