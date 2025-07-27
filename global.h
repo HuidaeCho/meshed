@@ -70,7 +70,8 @@ void free_outlet_list(struct outlet_list *);
 void add_outlet(struct outlet_list *, int, int, int, unsigned char);
 
 /* outlets.c */
-struct outlet_list *read_outlets(char *, char *, struct raster_map *);
+struct outlet_list *read_outlets(const char *, const char *, const char *,
+                                 const char *, struct raster_map *);
 int write_outlets(const char *, struct outlet_list *);
 
 /* delineate.c */

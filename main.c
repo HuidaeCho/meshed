@@ -18,11 +18,14 @@ int main(int argc, char *argv[])
         0;
     double (*recode)(double, void *) = NULL;
     int *recode_data = NULL, encoding[8];
-    char *dir_path = NULL, *outlets_path = NULL, *id_col =
-        NULL, *output_path = NULL, *hier_path = NULL;
+    char *dir_path = NULL, *dir_opts = NULL,
+        *outlets_path = NULL, *outlets_layer = NULL, *outlets_opts = NULL,
+        *id_col = NULL, *output_path = NULL, *hier_path = NULL;
     struct raster_map *dir_map;
     struct outlet_list *outlet_l;
-    struct timeval start_time, end_time;
+    struct timeval first_time, start_time, end_time;
+
+    gettimeofday(&first_time, NULL);
 
     for (i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
@@ -31,14 +34,14 @@ int main(int argc, char *argv[])
 
             for (j = 1; j < n && !unknown; j++) {
                 switch (argv[i][j]) {
-                case 'l':
+                case 'W':
+                    save_outlets = 1;
+                    break;
+                case 'm':
                     use_lessmem = 1;
                     break;
                 case 'c':
                     compress_output = 1;
-                    break;
-                case 'o':
-                    save_outlets = 1;
                     break;
                 case 'e':
                     if (i == argc - 1) {
@@ -81,13 +84,53 @@ int main(int argc, char *argv[])
                     recode = recode_encoding;
                     recode_data = encoding;
                     break;
+                case 'D':
+                    if (i == argc - 1) {
+                        fprintf(stderr,
+                                "-%c: Missing GDAL options for input direction\n",
+                                argv[i][j]);
+                        print_usage = 2;
+                        break;
+                    }
+                    dir_opts = argv[++i];
+                    break;
+                case 'O':
+                    if (i == argc - 1) {
+                        fprintf(stderr,
+                                "-%c: Missing GDAL options for input outlets\n",
+                                argv[i][j]);
+                        print_usage = 2;
+                        break;
+                    }
+                    outlets_opts = argv[++i];
+                    break;
+                case 'o':
+                    if (i == argc - 1) {
+                        fprintf(stderr,
+                                "-%c: Missing layer name for input outlets vector\n",
+                                argv[i][j]);
+                        print_usage = 2;
+                        break;
+                    }
+                    outlets_layer = argv[++i];
+                    break;
+                case 'h':
+                    if (i == argc - 1) {
+                        fprintf(stderr,
+                                "-%c: Missing output hierarchy path\n",
+                                argv[i][j]);
+                        print_usage = 2;
+                        break;
+                    }
+                    hier_path = argv[++i];
+                    break;
                 default:
                     unknown = 1;
                     break;
                 }
             }
             if (unknown) {
-                fprintf(stderr, "%c: Unknown flag\n", argv[i][j]);
+                fprintf(stderr, "%c: Unknown flag\n", argv[i][--j]);
                 print_usage = 2;
                 break;
             }
@@ -102,8 +145,6 @@ int main(int argc, char *argv[])
             output_path = argv[i];
             print_usage = 0;
         }
-        else if (!hier_path)
-            hier_path = argv[i];
         else {
             fprintf(stderr, "%s: Unable to process extra arguments\n",
                     argv[i]);
@@ -114,25 +155,28 @@ int main(int argc, char *argv[])
 
     if (save_outlets && (compress_output || hier_path)) {
         if (compress_output && hier_path)
-            fprintf(stderr,
-                    "Unable to process -o, -c, and hierarchy.txt at once\n");
+            fprintf(stderr, "Unable to process -W, -c, and -h at once\n");
         else if (compress_output)
-            fprintf(stderr, "Unable to process both -o and -c\n");
+            fprintf(stderr, "Unable to process both -W and -c\n");
         else
-            fprintf(stderr, "Unable to process both -o and hierarchy.txt\n");
+            fprintf(stderr, "Unable to process both -W and -h\n");
         print_usage = 2;
     }
 
     if (print_usage) {
         if (print_usage == 2)
             printf("\n");
-        printf
-            ("Usage: meshed [-lco] [-e encoding] fdr.tif outlets.shp id_col output.ext [hierarchy.txt]\n");
+        printf("Usage: meshed OPTIONS dir outlets id_col output\n");
         printf("\n");
-        printf("  -l\t\tUse less memory\n");
+        printf
+            ("  dir\t\tInput flow direction raster (e.g., gpkg:file.gpkg:layer)\n");
+        printf("  outlets\tInput outlets vector\n");
+        printf("  id_col\tInput column for outlet IDs\n");
+        printf("  output\tOutput GeoTIFF or output text file with -W\n");
+        printf("  -W\t\tWrite outlet rows and columns, and exit\n");
+        printf("  -m\t\tUse less memory\n");
         printf("  -c\t\tCompress output GeoTIFF file\n");
-        printf("  -o\t\tWrite outlet rows and columns, and exit\n");
-        printf("  -e encoding\tDirection encoding\n");
+        printf("  -e encoding\tInput flow direction encoding\n");
         printf
             ("\t\tpower2 (default): 2^0-7 CW from E (e.g., r.terraflow, ArcGIS)\n");
         printf("\t\ttaudem: 1-8 (E-SE CCW) (e.g., d8flowdir)\n");
@@ -140,15 +184,13 @@ int main(int argc, char *argv[])
         printf("\t\tdegree: (0,360] (E-E CCW)\n");
         printf
             ("\t\tE,SE,S,SW,W,NW,N,NE: custom (e.g., 1,8,7,6,5,4,3,2 for taudem)\n");
-        printf("  fdr.tif\tInput GeoTIFF file of flow direction raster\n");
-        printf("  outlets.shp\tInput Shapefile of outlets\n");
-        printf("  id_col\tID column\n");
+        printf("  -D opts\tComma-separated list of GDAL options for dir\n");
         printf
-            ("  output.ext\tOutput GeoTIFF file for subwatersheds raster\n");
+            ("  -O opts\tComma-separated list of GDAL options for outlets\n");
         printf
-            ("  \t\tOutput text file for outlet rows and columns with -o\n");
+            ("  -o layer\tLayer name of input outlets vector, if necessary (e.g., gpkg)\n");
         printf
-            ("  hierarchy.txt\tOutput text file for subwatershed hierarchy\n");
+            ("  -h hier.txt\tOutput text file for subwatershed hierarchy\n");
         exit(print_usage == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
     }
 
@@ -158,18 +200,17 @@ int main(int argc, char *argv[])
     gettimeofday(&start_time, NULL);
     if (recode) {
         printf("Converting flow direction encoding...\n");
-        if (!
-            (dir_map =
-             read_raster(dir_path, RASTER_MAP_TYPE_INT32, 0, recode,
-                         recode_data))) {
+        if (!(dir_map =
+              read_raster(dir_path, dir_opts, RASTER_MAP_TYPE_INT32, 0,
+                          recode, recode_data))) {
             fprintf(stderr, "%s: Failed to read flow direction raster\n",
                     dir_path);
             exit(EXIT_FAILURE);
         }
     }
-    else if (!
-             (dir_map =
-              read_raster(dir_path, RASTER_MAP_TYPE_INT32, 0, NULL, NULL))) {
+    else if (!(dir_map =
+               read_raster(dir_path, dir_opts, RASTER_MAP_TYPE_INT32, 0, NULL,
+                           NULL))) {
         fprintf(stderr, "%s: Failed to read flow direction raster\n",
                 dir_path);
         exit(EXIT_FAILURE);
@@ -180,7 +221,9 @@ int main(int argc, char *argv[])
 
     printf("Reading outlets <%s>...\n", outlets_path);
     gettimeofday(&start_time, NULL);
-    if (!(outlet_l = read_outlets(outlets_path, id_col, dir_map))) {
+    if (!(outlet_l =
+          read_outlets(outlets_path, outlets_layer, outlets_opts, id_col,
+                       dir_map))) {
         fprintf(stderr, "%s: Failed to read outlets\n", outlets_path);
         exit(EXIT_FAILURE);
     }
@@ -252,6 +295,10 @@ int main(int argc, char *argv[])
 
     free_raster(dir_map);
     free_outlet_list(outlet_l);
+
+    gettimeofday(&end_time, NULL);
+    printf("Total elapsed time: %lld microsec\n",
+           timeval_diff(NULL, &end_time, &first_time));
 
     exit(EXIT_SUCCESS);
 }

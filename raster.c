@@ -4,14 +4,16 @@
 #include <omp.h>
 #include "raster.h"
 
-void print_raster(const char *path, const char *null_str, const char *fmt)
+void print_raster(const char *path, const char *opts, const char *null_str,
+                  const char *fmt)
 {
     struct raster_map *rast_map;
     int width;
     char format[128], *type_format;
     int row, col;
 
-    if (!(rast_map = read_raster(path, RASTER_MAP_TYPE_AUTO, 1, NULL, NULL)))
+    if (!(rast_map =
+          read_raster(path, opts, RASTER_MAP_TYPE_AUTO, 1, NULL, NULL)))
         return;
 
     switch (rast_map->type) {
@@ -311,26 +313,42 @@ void copy_raster_metadata(struct raster_map *dest_map,
     dest_map->dy = src_map->dy;
 }
 
-struct raster_map *read_raster(const char *path, int type, int get_stats,
-                               double (*recode)(double, void *),
+struct raster_map *read_raster(const char *path, const char *opts, int type,
+                               int get_stats, double (*recode)(double,
+                                                               void *),
                                void *recode_data)
 {
     struct raster_map *rast_map;
-    GDALDatasetH *datasets, dataset;
-    GDALRasterBandH *bands, band;
+    const char **ds_opts = NULL;
+    GDALDatasetH dataset;
+    GDALRasterBandH band;
     GDALDataType gdt_type;
     size_t row_size;
     int row;
     int error = 0;
 
-#pragma omp parallel
-    {
-#pragma omp single
-        datasets = malloc(sizeof *datasets * omp_get_num_threads());
-        datasets[omp_get_thread_num()] = GDALOpen(path, GA_ReadOnly);
+    if (opts) {
+        char *o, *p;
+        int n;
+
+        strcpy((o = malloc(strlen(opts) + 1)), opts);
+        for (p = o, n = 2; *p; p++)
+            if (*p == ',')
+                n++;
+        ds_opts = malloc(sizeof *ds_opts * n);
+
+        for (p = o, n = 0; *p; p++) {
+            if (p == o || *(p - 1) == ',') {
+                ds_opts[n] = p;
+                if (p > o)
+                    *(p - 1) = 0;
+            }
+        }
     }
 
-    if (!(dataset = datasets[0]))
+    if (!(dataset =
+          GDALOpenEx(path, GDAL_OF_RASTER | GDAL_OF_THREAD_SAFE, NULL,
+                     ds_opts, NULL)))
         return NULL;
 
     rast_map = calloc(1, sizeof *rast_map);
@@ -341,15 +359,8 @@ struct raster_map *read_raster(const char *path, int type, int get_stats,
     rast_map->dx = rast_map->geotransform[1];
     rast_map->dy = -rast_map->geotransform[5];
 
-#pragma omp parallel
-    {
-#pragma omp single
-        bands = malloc(sizeof *bands * omp_get_num_threads());
-        bands[omp_get_thread_num()] =
-            GDALGetRasterBand(datasets[omp_get_thread_num()], 1);
-    }
+    band = GDALGetRasterBand(dataset, 1);
 
-    band = bands[0];
     if (get_stats) {
         rast_map->has_stats = 1;
         GDALGetRasterStatistics(band, 0, 1, &rast_map->min, &rast_map->max,
@@ -427,7 +438,7 @@ struct raster_map *read_raster(const char *path, int type, int get_stats,
 #pragma omp parallel for schedule(dynamic)
             for (row = 0; row < rast_map->nrows; row++) {
                 if (GDALRasterIO
-                    (bands[omp_get_thread_num()], GF_Read, 0, row,
+                    (band, GF_Read, 0, row,
                      rast_map->ncols, 1,
                      (char *)rast_map->cells.v + row * row_size,
                      rast_map->ncols, 1, gdt_type, 0, 0) == CE_None) {
@@ -535,7 +546,7 @@ struct raster_map *read_raster(const char *path, int type, int get_stats,
                 int thread_num = omp_get_thread_num();
 
                 if (GDALRasterIO
-                    (bands[thread_num], GF_Read, 0, row,
+                    (band, GF_Read, 0, row,
                      rast_map->ncols, 1, cells[thread_num].v, rast_map->ncols,
                      1, gdt_type, 0, 0) == CE_None) {
                     int col;
@@ -701,7 +712,7 @@ struct raster_map *read_raster(const char *path, int type, int get_stats,
 #pragma omp parallel for schedule(dynamic)
         for (row = 0; row < rast_map->nrows; row++) {
             if (GDALRasterIO
-                (bands[omp_get_thread_num()], GF_Read, 0, row,
+                (band, GF_Read, 0, row,
                  rast_map->ncols, 1,
                  (char *)rast_map->cells.v + row * row_size, rast_map->ncols,
                  1, gdt_type, 0, 0) != CE_None)
@@ -709,11 +720,7 @@ struct raster_map *read_raster(const char *path, int type, int get_stats,
         }
     }
 
-    free(bands);
-
-#pragma omp parallel
-    GDALClose(datasets[omp_get_thread_num()]);
-    free(datasets);
+    GDALClose(dataset);
 
     if (error)
         return NULL;
@@ -729,7 +736,6 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
     GDALRasterBandH band;
     GDALDataType data_type, gdt_type;
     size_t row_size;
-    int row;
 
     if (!driver)
         return 1;
@@ -739,7 +745,7 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
         return 2;
 
     if (rast_map->compress)
-        options = CSLSetNameValue(options, "COMPRESS", "LZW");
+        options = CSLSetNameValue(options, "COMPRESS", "ZSTD");
 
     row_size = rast_map->ncols;
 
@@ -796,10 +802,9 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
             break;
         }
 
-    if (!
-        (dataset =
-         GDALCreate(driver, path, rast_map->ncols, rast_map->nrows, 1,
-                    gdt_type, options)))
+    if (!(dataset =
+          GDALCreate(driver, path, rast_map->ncols, rast_map->nrows, 1,
+                     gdt_type, options)))
         return 3;
 
     GDALSetProjection(dataset, rast_map->projection);
@@ -808,13 +813,11 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
     band = GDALGetRasterBand(dataset, 1);
     GDALSetRasterNoDataValue(band, rast_map->null_value);
 
-    for (row = 0; row < rast_map->nrows; row++) {
-        if (GDALRasterIO
-            (band, GF_Write, 0, row, rast_map->ncols, 1,
-             (char *)rast_map->cells.v + row * row_size, rast_map->ncols,
-             1, data_type, 0, 0) != CE_None)
-            return 4;
-    }
+    if (GDALRasterIO
+        (band, GF_Write, 0, 0, rast_map->ncols, rast_map->nrows,
+         (char *)rast_map->cells.v, rast_map->ncols, rast_map->nrows,
+         data_type, 0, 0) != CE_None)
+        return 4;
 
     GDALClose(dataset);
 
