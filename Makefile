@@ -27,4 +27,4 @@ meshed$(EXT): \
 	$(CC) $(LDFLAGS) -o $@ $^ $(GDAL_LIBS)
 
 *.o: global.h raster.h
-delineate_*.o: delineate_funcs.h
+delineate*.o: delineate_funcs.h
