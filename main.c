@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     int *recode_data = NULL, encoding[8];
     char *dir_path = NULL, *dir_opts = NULL,
         *outlets_path = NULL, *outlets_layer = NULL, *outlets_opts = NULL,
-        *id_col = NULL, *output_path = NULL, *hier_path = NULL;
+        *id_col = NULL, *wsheds_path = NULL, *hier_path = NULL;
     int num_threads = 0;
     struct raster_map *dir_map;
     struct outlet_list *outlet_l;
@@ -152,8 +152,8 @@ int main(int argc, char *argv[])
             outlets_path = argv[i];
         else if (!id_col)
             id_col = argv[i];
-        else if (!output_path) {
-            output_path = argv[i];
+        else if (!wsheds_path) {
+            wsheds_path = argv[i];
             print_usage = 0;
         }
         else {
@@ -259,9 +259,9 @@ int main(int argc, char *argv[])
     if (save_outlets) {
         printf("Writing outlets...\n");
         gettimeofday(&start_time, NULL);
-        if (write_outlets(output_path, outlet_l) > 0) {
+        if (write_outlets(wsheds_path, outlet_l) > 0) {
             fprintf(stderr, "%s: Failed to write outlets file\n",
-                    output_path);
+                    wsheds_path);
             free_raster(dir_map);
             free_outlet_list(outlet_l);
             exit(EXIT_FAILURE);
@@ -280,11 +280,11 @@ int main(int argc, char *argv[])
              timeval_diff(NULL, &end_time, &start_time));
 
         dir_map->compress = compress_output;
-        printf("Writing subwatersheds raster <%s>...\n", output_path);
+        printf("Writing subwatersheds raster <%s>...\n", wsheds_path);
         gettimeofday(&start_time, NULL);
-        if (write_raster(output_path, dir_map, RASTER_MAP_TYPE_AUTO) > 0) {
+        if (write_raster(wsheds_path, dir_map, RASTER_MAP_TYPE_AUTO) > 0) {
             fprintf(stderr, "%s: Failed to write subwatersheds raster\n",
-                    output_path);
+                    wsheds_path);
             free_raster(dir_map);
             free_outlet_list(outlet_l);
             exit(EXIT_FAILURE);
