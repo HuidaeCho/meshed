@@ -4,6 +4,7 @@
 #include <string.h>
 #include <gdal.h>
 #include <cpl_conv.h>
+#include <omp.h>
 #ifdef _MSC_VER
 #include <winsock2.h>
 #else
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
     char *dir_path = NULL, *dir_opts = NULL,
         *outlets_path = NULL, *outlets_layer = NULL, *outlets_opts = NULL,
         *id_col = NULL, *output_path = NULL, *hier_path = NULL;
+    int num_threads = 0;
     struct raster_map *dir_map;
     struct outlet_list *outlet_l;
     struct timeval first_time, start_time, end_time;
@@ -124,6 +126,15 @@ int main(int argc, char *argv[])
                     }
                     hier_path = argv[++i];
                     break;
+                case 't':
+                    if (i == argc - 1) {
+                        fprintf(stderr, "-%c: Missing number of threads\n",
+                                argv[i][j]);
+                        print_usage = 2;
+                        break;
+                    }
+                    num_threads = atoi(argv[++i]);
+                    break;
                 default:
                     unknown = 1;
                     break;
@@ -191,8 +202,22 @@ int main(int argc, char *argv[])
             ("  -o layer\tLayer name of input outlets vector, if necessary (e.g., gpkg)\n");
         printf
             ("  -h hier.txt\tOutput text file for subwatershed hierarchy\n");
+        printf("  -t threads\tNumber of threads (default OMP_NUM_THREADS)\n");
         exit(print_usage == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
     }
+
+    if (num_threads == 0)
+        num_threads = omp_get_max_threads();
+    else {
+        if (num_threads < 0) {
+            num_threads += omp_get_num_procs();
+            if (num_threads < 1)
+                num_threads = 1;
+        }
+        omp_set_num_threads(num_threads);
+    }
+
+    printf("Using %d threads...\n", num_threads);
 
     GDALAllRegister();
 
