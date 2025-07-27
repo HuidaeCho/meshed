@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
             ("  -O opts\tComma-separated list of GDAL options for outlets\n");
         printf
             ("  -o layer\tLayer name of input outlets vector, if necessary (e.g., gpkg)\n");
-        printf("  -h hier.csv\tOutput subwatershed hierarchy CSV file\n");
+        printf("  -h hier.csv\tOutput subwatershed hierarchy CSV\n");
         printf("  -t threads\tNumber of threads (default OMP_NUM_THREADS)\n");
         exit(print_usage == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
     }
