@@ -27,7 +27,18 @@ int main(int argc, char *argv[])
     struct outlet_list *outlet_l;
     struct timeval first_time, start_time, end_time;
 
+#ifdef LOOP_THEN_TASK
+    char *p;
+#endif
+
     gettimeofday(&first_time, NULL);
+
+#ifdef LOOP_THEN_TASK
+    if ((p = getenv("MELFP_TRACING_STACK_SIZE")))
+        tracing_stack_size = atoi(p);
+    else
+        tracing_stack_size = 1024 * 3;
+#endif
 
     for (i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
@@ -135,6 +146,17 @@ int main(int argc, char *argv[])
                     }
                     num_threads = atoi(argv[++i]);
                     break;
+#ifdef LOOP_THEN_TASK
+                case 's':
+                    if (i == argc - 1) {
+                        fprintf(stderr, "-%c: Missing tracing stack size\n",
+                                argv[i][j]);
+                        print_usage = 2;
+                        break;
+                    }
+                    tracing_stack_size = atoi(argv[++i]);
+                    break;
+#endif
                 default:
                     unknown = 1;
                     break;
@@ -202,6 +224,10 @@ int main(int argc, char *argv[])
             ("  -o layer\tLayer name of input outlets vector, if necessary (e.g., gpkg)\n");
         printf("  -h hier.csv\tOutput subwatershed hierarchy CSV\n");
         printf("  -t threads\tNumber of threads (default OMP_NUM_THREADS)\n");
+#ifdef LOOP_THEN_TASK
+        printf("  -s size\tTracing stack size (default %d, 0 for guessing)\n",
+               tracing_stack_size);
+#endif
         exit(print_usage == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
     }
 
@@ -270,6 +296,17 @@ int main(int argc, char *argv[])
                timeval_diff(NULL, &end_time, &start_time));
     }
     else {
+#ifdef LOOP_THEN_TASK
+        if (tracing_stack_size <= 0) {
+            printf
+                ("Guessing tracing stack size using sqrt(nrows * ncols) / num_threads...\n");
+            tracing_stack_size =
+                sqrt((size_t)dir_map->nrows * dir_map->ncols) / num_threads;
+        }
+
+        printf("Tracing stack size for loop-then-task: %d\n",
+               tracing_stack_size);
+#endif
         printf("Delineating subwatersheds...\n");
         gettimeofday(&start_time, NULL);
         delineate(dir_map, outlet_l, use_lessmem);

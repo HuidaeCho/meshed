@@ -24,6 +24,19 @@
 static char *done;
 #endif
 
+/* relative row, col, and direction to the center in order of
+ * E S W N SE SW NW NE */
+static int nbr_rcd[8][3] = {
+    {0, 1, W},
+    {1, 0, N},
+    {0, -1, E},
+    {-1, 0, S},
+    {1, 1, NW},
+    {1, -1, NE},
+    {-1, -1, SE},
+    {-1, 1, SW}
+};
+
 struct cell
 {
     int row;
@@ -39,11 +52,18 @@ struct cell_stack
 
 static int nrows, ncols;
 
-static void trace_up(struct raster_map *, int, int, int, struct cell_stack *);
+#ifdef LOOP_THEN_TASK
+#define TRACE_UP_RETURN int
+#else
+#define TRACE_UP_RETURN void
+#endif
+
+static TRACE_UP_RETURN trace_up(struct raster_map *, int, int, int,
+                                struct cell_stack *);
 static void init_up_stack(struct cell_stack *);
 static void free_up_stack(struct cell_stack *);
 static void push_up(struct cell_stack *, struct cell *);
-static struct cell pop_up(struct cell_stack *);
+static void pop_up(struct cell_stack *, struct cell *);
 
 void DELINEATE(struct raster_map *dir_map, struct outlet_list *outlet_l)
 {
@@ -73,15 +93,71 @@ void DELINEATE(struct raster_map *dir_map, struct outlet_list *outlet_l)
     /* loop through all outlets and delineate the subwatershed for each */
 #pragma omp parallel for schedule(dynamic)
     for (i = 0; i < outlet_l->n; i++) {
-        struct cell_stack up_stack;
+        struct cell_stack *up_stack = malloc(sizeof *up_stack);
 
-        init_up_stack(&up_stack);
+        init_up_stack(up_stack);
 
         /* trace up flow directions */
-        trace_up(dir_map, outlet_l->row[i], outlet_l->col[i], outlet_l->id[i],
-                 &up_stack);
+#ifdef LOOP_THEN_TASK
+        if (
+#endif
+               trace_up(dir_map, outlet_l->row[i], outlet_l->col[i],
+                        outlet_l->id[i], up_stack)
+#ifdef LOOP_THEN_TASK
+            ) {
+#ifdef _MSC_VER
+            /* XXX: MSVC needs it! even with the above private(i), i inside
+             * tasks is not the same as i from the creator thread
+             * (undocumented?); GCC works without this line */
+            int I = i;
+#else
+#define I i
+#endif
 
-        free_up_stack(&up_stack);
+            do {
+                /* trace up from branching cells in the stack */
+                while (up_stack->n) {
+                    struct cell up;
+
+#pragma omp critical
+                    pop_up(up_stack, &up);
+
+#pragma omp task
+                    {
+                        int row = up.row, col = up.col;
+                        struct cell_stack *task_up_stack =
+                            malloc(sizeof *task_up_stack);
+
+                        init_up_stack(task_up_stack);
+
+                        /* trace up from a branching node */
+                        if (trace_up
+                            (dir_map, row, col, outlet_l->id[I],
+                             task_up_stack)) {
+                            while (task_up_stack->n) {
+                                struct cell task_up;
+
+                                pop_up(task_up_stack, &task_up);
+#pragma omp critical
+                                push_up(up_stack, &task_up);
+                            }
+                        }
+
+                        free_up_stack(task_up_stack);
+                    }
+                }
+#pragma omp taskwait
+            } while (up_stack->n);
+        }
+#endif
+        /* XXX: work around an indent bug
+         * #else
+         *     ;
+         * #endif
+         * doesn't work */
+        ;
+
+        free_up_stack(up_stack);
     }
 
     dir_map->null_value = SUBWATERSHED_NULL;
@@ -97,21 +173,24 @@ void DELINEATE(struct raster_map *dir_map, struct outlet_list *outlet_l)
 #endif
 }
 
-static void trace_up(struct raster_map *dir_map, int row, int col, int id,
-                     struct cell_stack *up_stack)
+static TRACE_UP_RETURN trace_up(struct raster_map *dir_map, int row, int col,
+                                int id, struct cell_stack *up_stack)
 {
-    int i, j;
-    int nup = 0;
-    int row_next = -1, col_next = -1;
+#ifdef DONT_USE_TCO
+    do {
+#endif
+        int i;
+        int nup = 0;
+        int next_row = -1, next_col = -1;
+        struct cell up;
 
-    for (i = -1; i <= 1; i++) {
-        /* skip edge cells */
-        if (row + i < 0 || row + i >= nrows)
-            continue;
+        for (i = 0; i < 8 && nup <= 1; i++) {
+            int nbr_row = row + nbr_rcd[i][0];
+            int nbr_col = col + nbr_rcd[i][1];
 
-        for (j = -1; j <= 1; j++) {
-            /* skip the current and edge cells */
-            if ((i == 0 && j == 0) || col + j < 0 || col + j >= ncols)
+            /* skip edge cells */
+            if (nbr_row < 0 || nbr_row >= nrows || nbr_col < 0 ||
+                nbr_col >= ncols)
                 continue;
 
             /* if a neighbor cell flows into the current cell, trace up
@@ -119,53 +198,74 @@ static void trace_up(struct raster_map *dir_map, int row, int col, int id,
              * processed because we don't want to misinterpret a subwatershed
              * ID as a direction; remember we're overwriting dir_map so it can
              * have both directions and subwatershed IDs */
-            if (GET_DIR(row + i, col + j) == dir_checks[i + 1][j + 1] &&
-                IS_NOTDONE(row + i, col + j)) {
-                if (++nup == 1) {
-                    /* climb up only to this cell at this time */
-                    row_next = row + i;
-                    col_next = col + j;
+            if (GET_DIR(nbr_row, nbr_col) == nbr_rcd[i][2] &&
+                IS_NOTDONE(nbr_row, nbr_col) && ++nup == 1) {
+                /* climb up only to this cell at this time */
+                next_row = nbr_row;
+                next_col = nbr_col;
 #ifndef USE_LESS_MEMORY
-                    SET_DONE(row_next, col_next);
+                SET_DONE(next_row, next_col);
 #endif
-                    SHED(row_next, col_next) = id;
-                }
-                else
-                    /* if we found more than one upstream cell, we don't need
-                     * to find more at this point */
-                    break;
+                SHED(next_row, next_col) = id;
             }
         }
-        /* if we found more than one upstream cell, we don't need to find more
-         * at this point */
-        if (nup > 1)
-            break;
-    }
 
-    if (!nup) {
-        /* reached a ridge cell; if there were any up cells to visit, let's go
-         * back or simply complete tracing */
-        struct cell up;
+        if (!nup) {
+            /* reached a ridge cell; if there were any up cells to visit, let's go
+             * back or simply complete tracing */
+            if (!up_stack->n)
+                return
+#ifdef LOOP_THEN_TASK
+                    0
+#endif
+                    ;
 
-        if (!up_stack->n)
-            return;
+#ifdef LOOP_THEN_TASK
+            /* next cell is not popped yet;
+             * if current stack size >= tracing stack size */
+            if (up_stack->n >= tracing_stack_size)
+                return 1;
+#endif
 
-        up = pop_up(up_stack);
-        row_next = up.row;
-        col_next = up.col;
-    }
-    else if (nup > 1) {
-        /* if there are more up cells to visit, let's come back later */
-        struct cell up;
+            pop_up(up_stack, &up);
+            next_row = up.row;
+            next_col = up.col;
+        }
+        else if (nup > 1) {
+            /* if there are more up cells to visit, let's come back later */
+            up.row = row;
+            up.col = col;
+            push_up(up_stack, &up);
+        }
 
-        up.row = row;
-        up.col = col;
-        push_up(up_stack, &up);
-    }
+#ifdef LOOP_THEN_TASK
+        /* next cell is not in the stack;
+         * if current stack size + next cell >= tracing stack size */
+        if (up_stack->n + 1 >= tracing_stack_size) {
+            up.row = next_row;
+            up.col = next_col;
+            push_up(up_stack, &up);
 
+            return 1;
+        }
+#endif
+
+#ifdef DONT_USE_TCO
+        row = next_row;
+        col = next_col;
+    } while (1);
+    /* XXX: work around an indent bug
+     * #else
+     * doesn't work */
+#endif
+#ifndef DONT_USE_TCO
     /* use gcc -O2 or -O3 flags for tail-call optimization
      * (-foptimize-sibling-calls) */
-    trace_up(dir_map, row_next, col_next, id, up_stack);
+#ifdef LOOP_THEN_TASK
+    return
+#endif
+        trace_up(dir_map, next_row, next_col, id, up_stack);
+#endif
 }
 
 static void init_up_stack(struct cell_stack *up_stack)
@@ -192,12 +292,10 @@ static void push_up(struct cell_stack *up_stack, struct cell *up)
     up_stack->cells[up_stack->n++] = *up;
 }
 
-static struct cell pop_up(struct cell_stack *up_stack)
+static void pop_up(struct cell_stack *up_stack, struct cell *up)
 {
-    struct cell up;
-
     if (up_stack->n > 0) {
-        up = up_stack->cells[--up_stack->n];
+        *up = up_stack->cells[--up_stack->n];
         if (up_stack->n == 0)
             free_up_stack(up_stack);
         else if (up_stack->n == up_stack->nalloc - REALLOC_INCREMENT) {
@@ -207,6 +305,4 @@ static struct cell pop_up(struct cell_stack *up_stack)
                         sizeof *up_stack->cells * up_stack->nalloc);
         }
     }
-
-    return up;
 }

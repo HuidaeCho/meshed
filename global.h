@@ -12,6 +12,8 @@ int gettimeofday(struct timeval *, struct timezone *);
 #endif
 #include "raster.h"
 
+#define LOOP_THEN_TASK
+
 #define REALLOC_INCREMENT 1024
 
 #define NE 128
@@ -40,21 +42,15 @@ struct hierarchy
     int *self, *up, *down;
 };
 
+#ifdef LOOP_THEN_TASK
 #ifdef _MAIN_C_
 #define GLOBAL
 #else
 #define GLOBAL extern
 #endif
 
-GLOBAL int dir_checks[3][3]
-#ifdef _MAIN_C_
-    = {
-    {SE, S, SW},
-    {E, 0, W},
-    {NE, N, NW}
-}
+GLOBAL int tracing_stack_size;
 #endif
-;
 
 /* timeval_diff.c */
 long long timeval_diff(struct timeval *, struct timeval *, struct timeval *);
