@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "global.h"
 
-#define SHED(row, col) shed_map->cells.int32[(row) * ncols + (col)]
+#define SHED(row, col) shed_map->cells.int32[(size_t)(row) * ncols + (col)]
 
 struct hierarchy *analyze_hierarchy(struct raster_map *shed_map,
                                     struct outlet_list *outlet_l)
