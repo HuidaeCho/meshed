@@ -38,15 +38,14 @@ struct outlet_list *read_outlets(const char *outlets_path,
     }
 
     if (!(dataset =
-          GDALOpenEx(outlets_path, GDAL_OF_VECTOR, NULL, NULL, NULL)))
+          GDALOpenEx(outlets_path, GDAL_OF_VECTOR, NULL, ds_opts, NULL)))
         return NULL;
 
     if (!GDALDatasetGetLayerCount(dataset))
         return NULL;
 
     if (!(layer =
-          layer_name ? GDALDatasetGetLayerByName(dataset,
-                                                 layer_name) :
+          layer_name ? GDALDatasetGetLayerByName(dataset, layer_name) :
           GDALDatasetGetLayer(dataset, 0)))
         return NULL;
 
