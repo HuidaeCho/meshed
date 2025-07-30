@@ -39,7 +39,7 @@ void add_outlet(struct outlet_list *ol, int row, int col, int id,
         ol->row = realloc(ol->row, sizeof *ol->row * ol->nalloc);
         ol->col = realloc(ol->col, sizeof *ol->col * ol->nalloc);
         ol->id = realloc(ol->id, sizeof *ol->id * ol->nalloc);
-	/* MESHED only */
+        /* MESHED only */
         ol->dir = realloc(ol->dir, sizeof *ol->dir * ol->nalloc);
         if (!ol->row || !ol->col || !ol->id || !ol->dir) {
             fprintf(stderr, "Unable to increase outlet list");
