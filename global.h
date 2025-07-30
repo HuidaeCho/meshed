@@ -43,16 +43,6 @@ struct shed_hier
     int *self, *up, *down;
 };
 
-#ifdef LOOP_THEN_TASK
-#ifdef _MAIN_C_
-#define GLOBAL
-#else
-#define GLOBAL extern
-#endif
-
-GLOBAL int tracing_stack_size;
-#endif
-
 /* timeval_diff.c */
 long long timeval_diff(struct timeval *, struct timeval *, struct timeval *);
 
@@ -72,13 +62,25 @@ struct outlet_list *read_outlets(const char *, const char *, const char *,
 int write_outlets(const char *, struct outlet_list *);
 
 /* delineate.c */
-void delineate(struct raster_map *, struct outlet_list *, int);
+void delineate(struct raster_map *, struct outlet_list *, int
+#ifdef LOOP_THEN_TASK
+               , int
+#endif
+    );
 
 /* delineate_lessmem.c */
-void delineate_lessmem(struct raster_map *, struct outlet_list *);
+void delineate_lessmem(struct raster_map *, struct outlet_list *
+#ifdef LOOP_THEN_TASK
+                       , int
+#endif
+    );
 
 /* delineate_moremem.c */
-void delineate_moremem(struct raster_map *, struct outlet_list *);
+void delineate_moremem(struct raster_map *, struct outlet_list *
+#ifdef LOOP_THEN_TASK
+                       , int
+#endif
+    );
 
 /* shed_hier.c */
 struct shed_hier *analyze_shed_hier(struct raster_map *,

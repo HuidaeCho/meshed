@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 
 #ifdef LOOP_THEN_TASK
     char *p;
+    int tracing_stack_size;
 #endif
 
     gettimeofday(&first_time, NULL);
@@ -305,7 +306,11 @@ int main(int argc, char *argv[])
 #endif
         printf("Delineating subwatersheds...\n");
         gettimeofday(&start_time, NULL);
-        delineate(dir_map, outlet_l, use_lessmem);
+        delineate(dir_map, outlet_l, use_lessmem
+#ifdef LOOP_THEN_TASK
+                  , tracing_stack_size
+#endif
+            );
         gettimeofday(&end_time, NULL);
         printf
             ("Computation time for subwatershed delineation: %lld microsec\n",
