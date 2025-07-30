@@ -3,7 +3,8 @@
 #include <gdal.h>
 #include "global.h"
 
-#define DIR(row, col) dir_map->cells.int32[(size_t)(row) * dir_map->ncols + (col)]
+#define DIR(row, col) \
+        dir_map->cells.int32[(size_t)(row) * dir_map->ncols + (col)]
 
 struct outlet_list *read_outlets(const char *outlets_path,
                                  const char *layer_name, const char *opts,
