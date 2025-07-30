@@ -23,7 +23,7 @@ meshed$(EXT): \
 	delineate.o \
 	delineate_lessmem.o \
 	delineate_moremem.o \
-	hierarchy.o
+	shed_hier.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(GDAL_LIBS)
 
 *.o: global.h raster.h

@@ -4,10 +4,10 @@
 
 #define SHED(row, col) shed_map->cells.int32[(size_t)(row) * ncols + (col)]
 
-struct hierarchy *analyze_hierarchy(struct raster_map *shed_map,
+struct shed_hier *analyze_shed_hier(struct raster_map *shed_map,
                                     struct outlet_list *outlet_l)
 {
-    struct hierarchy *hier = malloc(sizeof *hier);
+    struct shed_hier *hier = malloc(sizeof *hier);
     int nrows = shed_map->nrows, ncols = shed_map->ncols;
     int i;
 
@@ -73,7 +73,7 @@ struct hierarchy *analyze_hierarchy(struct raster_map *shed_map,
     return hier;
 }
 
-int write_hierarchy(const char *hier_path, struct hierarchy *hier,
+int write_shed_hier(const char *hier_path, struct shed_hier *hier,
                     const char *id_col)
 {
     FILE *fp;

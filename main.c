@@ -330,17 +330,17 @@ int main(int argc, char *argv[])
                timeval_diff(NULL, &end_time, &start_time));
 
         if (hier_path) {
-            struct hierarchy *hier;
+            struct shed_hier *hier;
 
             printf("Analyzing subwatershed hierarchy...\n");
             gettimeofday(&start_time, NULL);
-            hier = analyze_hierarchy(dir_map, outlet_l);
+            hier = analyze_shed_hier(dir_map, outlet_l);
             gettimeofday(&end_time, NULL);
             printf
                 ("Analysis time for subwatershed hierarchy: %lld microsec\n",
                  timeval_diff(NULL, &end_time, &start_time));
 
-            if (write_hierarchy(hier_path, hier, id_col) > 0) {
+            if (write_shed_hier(hier_path, hier, id_col) > 0) {
                 fprintf(stderr,
                         "%s: Failed to write subwatershed hierarchy file\n",
                         hier_path);

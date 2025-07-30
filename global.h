@@ -37,7 +37,7 @@ struct outlet_list
     unsigned char *dir;
 };
 
-struct hierarchy
+struct shed_hier
 {
     int n;
     int *self, *up, *down;
@@ -80,9 +80,9 @@ void delineate_lessmem(struct raster_map *, struct outlet_list *);
 /* delineate_moremem.c */
 void delineate_moremem(struct raster_map *, struct outlet_list *);
 
-/* hierarchy.c */
-struct hierarchy *analyze_hierarchy(struct raster_map *,
+/* shed_hier.c */
+struct shed_hier *analyze_shed_hier(struct raster_map *,
                                     struct outlet_list *);
-int write_hierarchy(const char *, struct hierarchy *, const char *);
+int write_shed_hier(const char *, struct shed_hier *, const char *);
 
 #endif
