@@ -160,12 +160,12 @@ void DELINEATE(struct raster_map *dir_map, struct outlet_list *outlet_l)
         free_up_stack(up_stack);
     }
 
-    dir_map->null_value = SUBWATERSHED_NULL;
+    dir_map->null_value = SHED_NULL;
 #pragma omp parallel for schedule(dynamic) private(j)
     for (i = 0; i < nrows; i++) {
         for (j = 0; j < ncols; j++)
             if (IS_NOTDONE(i, j))
-                SHED(i, j) = SUBWATERSHED_NULL;
+                SHED(i, j) = SHED_NULL;
     }
 
 #ifndef USE_LESS_MEMORY

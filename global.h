@@ -25,8 +25,8 @@ int gettimeofday(struct timeval *, struct timezone *);
 #define SE 2
 #define E 1
 
-#define SUBWATERSHED_NULL INT32_MIN
-#define HIERARCHY_NULL -1
+#define SHED_NULL INT32_MIN
+#define SHED_HIER_NULL -1
 
 struct outlet_list
 {

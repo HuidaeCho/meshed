@@ -54,8 +54,7 @@ struct shed_hier *analyze_shed_hier(struct raster_map *shed_map,
         }
 
         hier->down[i] = row < 0 || row >= nrows || col < 0 || col >= ncols ||
-            SHED(row, col) == SUBWATERSHED_NULL ? HIERARCHY_NULL : SHED(row,
-                                                                        col);
+            SHED(row, col) == SHED_NULL ? SHED_HIER_NULL : SHED(row, col);
     }
 
 #pragma omp parallel for schedule(dynamic)
@@ -65,7 +64,7 @@ struct shed_hier *analyze_shed_hier(struct raster_map *shed_map,
 
         for (j = 0; j < hier->n && hier->down[j] != self; j++) ;
         if (j == hier->n)
-            hier->up[i] = HIERARCHY_NULL;
+            hier->up[i] = SHED_HIER_NULL;
         else
             hier->up[i] = hier->self[j];
     }
