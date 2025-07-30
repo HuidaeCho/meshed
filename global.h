@@ -68,7 +68,7 @@ void add_outlet(struct outlet_list *, int, int, int, unsigned char);
 
 /* outlets.c */
 struct outlet_list *read_outlets(const char *, const char *, const char *,
-                                 const char *, struct raster_map *);
+                                 const char *, struct raster_map *, int);
 int write_outlets(const char *, struct outlet_list *);
 
 /* delineate.c */

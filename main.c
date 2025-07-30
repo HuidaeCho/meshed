@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
     gettimeofday(&start_time, NULL);
     if (!(outlet_l =
           read_outlets(outlets_path, outlets_layer, outlets_opts, id_col,
-                       dir_map))) {
+                       dir_map, hier_path != NULL))) {
         fprintf(stderr, "%s: Failed to read outlets\n", outlets_path);
         exit(EXIT_FAILURE);
     }

@@ -8,7 +8,7 @@
 struct outlet_list *read_outlets(const char *outlets_path,
                                  const char *layer_name, const char *opts,
                                  const char *id_col,
-                                 struct raster_map *dir_map)
+                                 struct raster_map *dir_map, int store_dir)
 {
     struct outlet_list *outlet_l = malloc(sizeof *outlet_l);
     const char **ds_opts = NULL;
@@ -86,7 +86,8 @@ struct outlet_list *read_outlets(const char *outlets_path,
             /* if the outlet is outside the computational region, skip */
             if (row >= 0 && row < dir_map->nrows && col >= 0 &&
                 col < dir_map->ncols)
-                add_outlet(outlet_l, row, col, id, DIR(row, col));
+                add_outlet(outlet_l, row, col, id,
+                           store_dir ? DIR(row, col) : 0);
             else
                 printf
                     ("Skip outlet %d at (%d, %d) outside the current region\n",
