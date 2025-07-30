@@ -33,6 +33,7 @@ struct outlet_list
     int nalloc, n;
     int *row, *col;
     int *id;
+    /* MESHED only */
     unsigned char *dir;
 };
 
