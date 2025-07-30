@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <gdal.h>
 #include <omp.h>
+#include <gdal.h>
 #ifdef _MSC_VER
 #include <winsock2.h>
 #else
