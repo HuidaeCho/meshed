@@ -6,6 +6,8 @@ Please cite [Cho (2025)](https://doi.org/10.1016/j.envsoft.2024.106244) when you
 
 **Citation**: Huidae Cho, January 2025. Avoid Backtracking and Burn Your Inputs: CONUS-Scale Watershed Delineation Using OpenMP. Environmental Modelling & Software 183, 106244. [doi:10.1016/j.envsoft.2024.106244](https://doi.org/10.1016/j.envsoft.2024.106244). [Author's Version](https://idea.isnew.info/publications/Avoid%20backtracking%20and%20burn%20your%20inputs:%20CONUS-scale%20watershed%20delineation%20using%20OpenMP%20-%20Cho.2025.pdf).
 
+[MESHED Graphical Abstract](https://idea.isnew.info/publications/Avoid%20backtracking%20and%20burn%20your%20inputs:%20CONUS-scale%20watershed%20delineation%20using%20OpenMP%20-%20Graphical%20abstract.svg)
+
 ![image](https://clawrim.isnew.info/wp-content/uploads/2024/07/meshed-flyer.png)
 
 Predefined flow direction encodings in GeoTIFF: power2 (default, r.terraflow, ArcGIS), taudem (d8flowdir), 45degree (r.watershed), degree<br>
