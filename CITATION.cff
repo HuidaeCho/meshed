@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+title: "Avoid Backtracking and Burn Your Inputs: CONUS-Scale Watershed Delineation Using OpenMP"
+authors:
+  - family-names: Cho
+    given-names: Huidae
+date-released: 2025-01
+version: "0.1.0"
+message: >
+  If you use this software, please cite the associated journal article.
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Cho
+      given-names: Huidae
+  title: "Avoid Backtracking and Burn Your Inputs: CONUS-Scale Watershed Delineation Using OpenMP"
+  journal: "Environmental Modelling & Software"
+  volume: 183
+  pages: "106244"
+  year: 2025
+  month: jan
+  doi: 10.1016/j.envsoft.2024.106244
