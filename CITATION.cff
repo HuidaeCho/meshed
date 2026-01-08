@@ -1,12 +1,13 @@
 cff-version: 1.2.0
-title: "Avoid Backtracking and Burn Your Inputs: CONUS-Scale Watershed Delineation Using OpenMP"
+title: "Memory-Efficient Watershed Delineation (MESHED)"
+version: "0.1.0"
 authors:
   - family-names: Cho
     given-names: Huidae
-date-released: 2025-01
-version: "0.1.0"
+date-released: "2025-01-01"
+url: "https://github.com/HuidaeCho/meshed"
 message: >
-  If you use this software, please cite the associated journal article.
+  If you use this software or its algorithms, please cite the associated journal article.
 preferred-citation:
   type: article
   authors:
@@ -17,5 +18,5 @@ preferred-citation:
   volume: 183
   pages: "106244"
   year: 2025
-  month: jan
+  month: 1
   doi: 10.1016/j.envsoft.2024.106244
