@@ -11,7 +11,7 @@
 int main(int argc, char *argv[])
 {
     int i;
-    int print_usage = 1, use_lessmem = 0, compress_output = 0, save_outlets =
+    int print_usage = 1, use_lessmem = 1, compress_output = 0, save_outlets =
         0;
     double (*recode)(double, void *) = NULL;
     int *recode_data = NULL, encoding[8];
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
                     save_outlets = 1;
                     break;
                 case 'm':
-                    use_lessmem = 1;
+                    use_lessmem = 0;
                     break;
                 case 'z':
                     compress_output = 1;
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
                "  id_col\tInput column for outlet IDs\n"
                "  output\tOutput GeoTIFF or output text file with -W\n"
                "  -W\t\tWrite outlet rows and columns, and exit\n"
-               "  -m\t\tUse less memory\n"
+               "  -m\t\tUse more memory\n"
                "  -z\t\tCompress output GeoTIFF\n"
                "  -e encoding\tInput flow direction encoding\n"
                "\t\tpower2 (default): 2^0-7 CW from E (e.g., r.terraflow, ArcGIS)\n"
